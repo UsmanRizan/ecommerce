@@ -10,7 +10,7 @@ export const protectRoute = async (req, res, next) => {
         .json({ message: "Unauthorized: No token provided" });
     }
     try {
-      const decoded = jwt.verify(accessToken, process.env.accessTokenSecret);
+      const decoded = jwt.verify(accessToken, process.env.access_Token_secret);
       const user = await User.findById(decoded.userId).select("-password");
       if (!user) {
         return res

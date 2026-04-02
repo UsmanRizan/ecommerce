@@ -1,6 +1,6 @@
 import Coupon from "../models/coupon.model.js";
 import Order from "../models/order.model.js";
-import stripe from "../lib/stripe.js";
+import { stripe } from "../lib/stripe.js";
 import dotenv from "dotenv";
 dotenv.config();
 

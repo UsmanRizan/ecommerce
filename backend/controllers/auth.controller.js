@@ -141,3 +141,12 @@ export const refreshToken = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const getProfile = async (req, res) => {
+  try {
+    res.json(req.user);
+  } catch (error) {
+    console.error("Get profile error:", error);
+    res.status(500).json({ message: error.message });
+  }
+};

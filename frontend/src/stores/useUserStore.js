@@ -18,6 +18,7 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await axios.post("/auth/signup", { name, email, password });
       set({ user: res.data, loading: false });
+      toast.success("Signup successful");
     } catch (error) {
       set({ loading: false });
       toast.error(error.response?.data?.message || "Signup failed");
@@ -30,6 +31,7 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await axios.post("/auth/login", { email, password });
       set({ user: res.data, loading: false });
+      toast.success("Login successful");
     } catch (error) {
       set({ loading: false });
       toast.error(error.response?.data?.message || "Login failed");
@@ -40,6 +42,7 @@ export const useUserStore = create((set, get) => ({
     try {
       await axios.post("/auth/logout");
       set({ user: null });
+      toast.success("Logged out successfully");
     } catch (error) {
       toast.error(error.response?.data?.message || "Logout failed");
     }
@@ -50,8 +53,12 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await axios.get("/auth/profile");
       set({ user: res.data, checkingAuth: false });
+      toast.success("Authentication check successful");
     } catch (error) {
       set({ checkingAuth: false, user: null });
+      toast.error(
+        error.response?.data?.message || "Failed to check authentication",
+      );
     }
   },
 }));

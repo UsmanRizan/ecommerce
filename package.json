@@ -20,16 +20,25 @@
   },
   "homepage": "https://github.com/UsmanRizan/ecommerce#readme",
   "dependencies": {
+    "@stripe/stripe-js": "^9.0.1",
+    "axios": "^1.14.0",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.9.0",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "framer-motion": "^12.38.0",
     "ioredis": "^5.10.0",
     "jsonwebtoken": "^9.0.3",
+    "lucide-react": "^1.7.0",
     "mongoose": "^9.2.4",
-    "stripe": "^20.4.1"
+    "react-confetti": "^6.4.0",
+    "react-hot-toast": "^2.6.0",
+    "react-router-dom": "^7.14.0",
+    "recharts": "^3.8.1",
+    "stripe": "^20.4.1",
+    "zustand": "^5.0.12"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"

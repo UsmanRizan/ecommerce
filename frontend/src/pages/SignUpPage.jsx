@@ -2,19 +2,21 @@ import { motion } from "framer-motion";
 import { ArrowRight, Loader, Lock, Mail, User, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useUserStore } from "../stores/useUserStore";
 
 function SignUpPage() {
-  const loading = false;
   const [formData, setFormData] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
 
+  const { signup, loading } = useUserStore();
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    signup(formData);
     // Handle form submission logic here
   };
 

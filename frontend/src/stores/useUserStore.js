@@ -53,7 +53,6 @@ export const useUserStore = create((set, get) => ({
     try {
       const res = await axios.get("/auth/profile");
       set({ user: res.data, checkingAuth: false });
-      toast.success("Authentication check successful");
     } catch (error) {
       set({ checkingAuth: false, user: null });
       toast.error(

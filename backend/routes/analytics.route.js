@@ -3,7 +3,7 @@ import { adminRoute, protectRoute } from "../middleware/auth.middleware.js";
 import {
   getAnalyticsData,
   getDailySalesData,
-} from "../controllers/analysis.controller.js";
+} from "../controllers/analytics.controller.js";
 
 const router = express.Router();
 
@@ -12,14 +12,17 @@ router.get("/", protectRoute, adminRoute, async (req, res) => {
     const analyticsData = await getAnalyticsData();
 
     const endDate = new Date();
-    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000); // Last 7 days
+    const startDate = new Date(endDate.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const dailySalesData = await getDailySalesData(startDate, endDate);
 
-    res.json({ analyticsData, dailySalesData });
+    res.json({
+      analyticsData,
+      dailySalesData,
+    });
   } catch (error) {
-    console.error("Error fetching analytics data:", error);
-    res.status(500).json({ message: "Internal server error" });
+    console.log("Error in analytics route", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 });
 

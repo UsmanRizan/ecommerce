@@ -7,7 +7,6 @@ export const useProductStore = create((set) => ({
   loading: false,
 
   setProducts: (products) => set({ products }),
-
   createProduct: async (productData) => {
     set({ loading: true });
     try {
@@ -51,7 +50,6 @@ export const useProductStore = create((set) => ({
         ),
         loading: false,
       }));
-      toast.success("Product deleted successfully!");
     } catch (error) {
       set({ loading: false });
       toast.error(error.response.data.error || "Failed to delete product");
@@ -70,9 +68,6 @@ export const useProductStore = create((set) => ({
         ),
         loading: false,
       }));
-      toast.success(
-        `Product ${response.data.isFeatured ? "featured" : "unfeatured"} successfully!`,
-      );
     } catch (error) {
       set({ loading: false });
       toast.error(error.response.data.error || "Failed to update product");

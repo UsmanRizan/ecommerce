@@ -13,7 +13,6 @@ const ProductCard = ({ product }) => {
     } else {
       // add to cart
       addToCart(product);
-      toast.success(`${product.name} added to cart!`, { id: "addToCart" });
     }
   };
 
@@ -29,7 +28,7 @@ const ProductCard = ({ product }) => {
       </div>
 
       <div className="mt-4 px-5 pb-5">
-        <h5 className="text-xl font-semibold tracking-tight text-white">
+        <h5 className="text-xl font-semibold tracking-tight text-black ">
           {product.name}
         </h5>
         <div className="mt-2 mb-5 flex items-center justify-between">
@@ -41,7 +40,7 @@ const ProductCard = ({ product }) => {
         </div>
         <button
           className="flex items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-center text-sm font-medium
-					 text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
+					 text-black hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300"
           onClick={handleAddToCart}
         >
           <ShoppingCart size={22} className="mr-2" />

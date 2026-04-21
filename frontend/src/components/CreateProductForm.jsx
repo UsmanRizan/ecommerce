@@ -35,8 +35,8 @@ const CreateProductForm = () => {
         category: "",
         image: "",
       });
-    } catch (error) {
-      console.error("Error creating product:", error);
+    } catch {
+      console.log("error creating a product");
     }
   };
 
@@ -63,8 +63,9 @@ const CreateProductForm = () => {
       <h2 className="text-2xl font-semibold mb-6 text-emerald-300">
         Create New Product
       </h2>
+
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="">
+        <div>
           <label
             htmlFor="name"
             className="block text-sm font-medium text-gray-300"
@@ -123,7 +124,7 @@ const CreateProductForm = () => {
             onChange={(e) =>
               setNewProduct({ ...newProduct, price: e.target.value })
             }
-            step="10"
+            step="0.01"
             className="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm 
 						py-2 px-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500
 						 focus:border-emerald-500"
@@ -158,6 +159,7 @@ const CreateProductForm = () => {
             ))}
           </select>
         </div>
+
         <div className="mt-1 flex items-center">
           <input
             type="file"
@@ -177,6 +179,7 @@ const CreateProductForm = () => {
             <span className="ml-3 text-sm text-gray-400">Image uploaded </span>
           )}
         </div>
+
         <button
           type="submit"
           className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md 
@@ -203,5 +206,4 @@ const CreateProductForm = () => {
     </motion.div>
   );
 };
-
 export default CreateProductForm;

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import axios from "../lib/axios";
-import { Users, Package, ShoppingCart, DollarSign, Loader } from "lucide-react";
+import { Users, Package, ShoppingCart, DollarSign } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -40,11 +40,7 @@ const AnalyticsTab = () => {
   }, []);
 
   if (isLoading) {
-    return (
-      <div>
-        <Loader />
-      </div>
-    );
+    return <div>Loading...</div>;
   }
 
   return (

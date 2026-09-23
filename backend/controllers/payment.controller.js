@@ -1,6 +1,41 @@
 import Coupon from "../models/coupon.model.js";
 import Order from "../models/order.model.js";
+import User from "../models/user.model.js";
 import { stripe } from "../lib/stripe.js";
+
+const SHIPPING_FIELDS = [
+  "fullName",
+  "email",
+  "phone",
+  "address",
+  "city",
+  "postalCode",
+  "country",
+];
+
+// returns cleaned shipping info, or an error message if invalid
+function validateShippingInfo(shippingInfo) {
+  if (!shippingInfo || typeof shippingInfo !== "object") {
+    return { error: "Contact and delivery details are required" };
+  }
+
+  const cleaned = {};
+  for (const field of SHIPPING_FIELDS) {
+    const value = String(shippingInfo[field] ?? "").trim();
+    if (!value) return { error: `${field} is required` };
+    if (value.length > 200) return { error: `${field} is too long` };
+    cleaned[field] = value;
+  }
+
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleaned.email)) {
+    return { error: "Invalid email address" };
+  }
+  if (!/^\+?[0-9\s\-()]{7,20}$/.test(cleaned.phone)) {
+    return { error: "Invalid phone number" };
+  }
+
+  return { shippingInfo: cleaned };
+}
 
 export const createCheckoutSession = async (req, res) => {
   try {
@@ -8,6 +43,13 @@ export const createCheckoutSession = async (req, res) => {
 
     if (!Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ error: "Invalid or empty products array" });
+    }
+
+    const { shippingInfo, error: shippingError } = validateShippingInfo(
+      req.body.shippingInfo,
+    );
+    if (shippingError) {
+      return res.status(400).json({ error: shippingError });
     }
 
     let totalAmount = 0;
@@ -48,6 +90,7 @@ export const createCheckoutSession = async (req, res) => {
       line_items: lineItems,
       mode: "payment",
       ui_mode: "embedded",
+      customer_email: shippingInfo.email,
       return_url: `${process.env.CLIENT_URL}/purchase-success?session_id={CHECKOUT_SESSION_ID}`,
       discounts: coupon
         ? [
@@ -59,6 +102,10 @@ export const createCheckoutSession = async (req, res) => {
       metadata: {
         userId: req.user._id.toString(),
         couponCode: couponCode || "",
+        // stripe metadata values are limited to 500 chars, so store each field separately
+        ...Object.fromEntries(
+          SHIPPING_FIELDS.map((field) => [`ship_${field}`, shippingInfo[field]]),
+        ),
         products: JSON.stringify(
           products.map((p) => ({
             id: p._id,
@@ -89,41 +136,66 @@ export const checkoutSuccess = async (req, res) => {
     const { sessionId } = req.body;
     const session = await stripe.checkout.sessions.retrieve(sessionId);
 
-    if (session.payment_status === "paid") {
-      if (session.metadata.couponCode) {
-        await Coupon.findOneAndUpdate(
-          {
-            code: session.metadata.couponCode,
-            userId: session.metadata.userId,
-          },
-          {
-            isActive: false,
-          },
-        );
-      }
+    if (session.metadata.userId !== req.user._id.toString()) {
+      return res.status(403).json({ message: "This checkout session is not yours" });
+    }
 
-      // create a new Order
-      const products = JSON.parse(session.metadata.products);
-      const newOrder = new Order({
-        user: session.metadata.userId,
-        products: products.map((product) => ({
-          product: product.id,
-          quantity: product.quantity,
-          price: product.price,
-        })),
-        totalAmount: session.amount_total / 100, // convert from cents to dollars,
-        stripeSessionId: sessionId,
-      });
+    if (session.payment_status !== "paid") {
+      return res.status(400).json({ message: "Payment not completed" });
+    }
 
-      await newOrder.save();
-
-      res.status(200).json({
+    // this endpoint can be hit more than once for the same session (page refresh, React StrictMode)
+    const existingOrder = await Order.findOne({ stripeSessionId: sessionId });
+    if (existingOrder) {
+      await User.findByIdAndUpdate(session.metadata.userId, { cartItems: [] });
+      return res.status(200).json({
         success: true,
-        message:
-          "Payment successful, order created, and coupon deactivated if used.",
-        orderId: newOrder._id,
+        message: "Order already processed.",
+        orderId: existingOrder._id,
       });
     }
+
+    if (session.metadata.couponCode) {
+      await Coupon.findOneAndUpdate(
+        {
+          code: session.metadata.couponCode,
+          userId: session.metadata.userId,
+        },
+        {
+          isActive: false,
+        },
+      );
+    }
+
+    // create a new Order
+    const products = JSON.parse(session.metadata.products);
+    const newOrder = new Order({
+      user: session.metadata.userId,
+      products: products.map((product) => ({
+        product: product.id,
+        quantity: product.quantity,
+        price: product.price,
+      })),
+      totalAmount: session.amount_total / 100, // convert from cents to dollars,
+      shippingInfo: Object.fromEntries(
+        SHIPPING_FIELDS.map((field) => [
+          field,
+          session.metadata[`ship_${field}`],
+        ]),
+      ),
+      stripeSessionId: sessionId,
+    });
+
+    await newOrder.save();
+
+    await User.findByIdAndUpdate(session.metadata.userId, { cartItems: [] });
+
+    res.status(200).json({
+      success: true,
+      message:
+        "Payment successful, order created, and coupon deactivated if used.",
+      orderId: newOrder._id,
+    });
   } catch (error) {
     console.error("Error processing successful checkout:", error);
     res.status(500).json({

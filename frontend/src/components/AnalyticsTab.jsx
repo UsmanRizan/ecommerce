@@ -79,17 +79,34 @@ const AnalyticsTab = () => {
       >
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={dailySalesData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" stroke="#D1D5DB" />
-            <YAxis yAxisId="left" stroke="#D1D5DB" />
-            <YAxis yAxisId="right" orientation="right" stroke="#D1D5DB" />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+            <XAxis
+              dataKey="date"
+              stroke="#D1D5DB"
+              tickFormatter={(d) =>
+                new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" })
+              }
+            />
+            <YAxis yAxisId="left" stroke="#10B981" allowDecimals={false} />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              stroke="#3B82F6"
+              tickFormatter={(v) => `$${v}`}
+            />
+            <Tooltip
+              contentStyle={{ backgroundColor: "#1F2937", border: "1px solid #374151", borderRadius: 8 }}
+              labelStyle={{ color: "#D1D5DB" }}
+              labelFormatter={(d) => new Date(d).toLocaleDateString()}
+              formatter={(value, name) => (name === "Revenue" ? `$${value.toLocaleString()}` : value)}
+            />
             <Legend />
             <Line
               yAxisId="left"
               type="monotone"
               dataKey="sales"
               stroke="#10B981"
+              strokeWidth={2}
               activeDot={{ r: 8 }}
               name="Sales"
             />
@@ -98,6 +115,7 @@ const AnalyticsTab = () => {
               type="monotone"
               dataKey="revenue"
               stroke="#3B82F6"
+              strokeWidth={2}
               activeDot={{ r: 8 }}
               name="Revenue"
             />

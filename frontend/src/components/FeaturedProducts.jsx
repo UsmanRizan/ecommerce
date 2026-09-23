@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCartStore } from "../stores/useCartStore";
@@ -51,18 +52,23 @@ const FeaturedProducts = ({ featuredProducts }) => {
                   key={product._id}
                   className="w-full sm:w-1/2 lg:w-1/3 xl:w-1/4 flex shrink-0 px-2"
                 >
-                  <div className="bg-white bg-opacity-10 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden h-full transition-all duration-300 hover:shadow-xl border border-emerald-500/30">
-                    <div className="overflow-hidden">
+                  <div className="bg-white/10 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden h-full transition-all duration-300 hover:shadow-xl border border-emerald-500/30">
+                    <Link
+                      to={`/product/${product._id}`}
+                      className="block overflow-hidden"
+                    >
                       <img
                         src={product.image}
                         alt={product.name}
                         className="w-full h-48 object-cover transition-transform duration-300 ease-in-out hover:scale-110"
                       />
-                    </div>
+                    </Link>
                     <div className="p-4">
-                      <h3 className="text-lg font-semibold mb-2 text-black">
-                        {product.name}
-                      </h3>
+                      <Link to={`/product/${product._id}`}>
+                        <h3 className="text-lg font-semibold mb-2 text-white hover:text-emerald-400">
+                          {product.name}
+                        </h3>
+                      </Link>
                       <p className="text-emerald-300 font-medium mb-4">
                         ${product.price.toFixed(2)}
                       </p>

@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Minus, Plus, Trash } from "lucide-react";
 import { useCartStore } from "../stores/useCartStore";
 
@@ -8,7 +9,13 @@ const CartItem = ({ item }) => {
     <div className="rounded-lg border p-4 shadow-sm border-gray-700 bg-gray-800 md:p-6">
       <div className="space-y-4 md:flex md:items-center md:justify-between md:gap-6 md:space-y-0">
         <div className="shrink-0 md:order-1">
-          <img className="h-20 md:h-32 rounded object-cover" src={item.image} />
+          <Link to={`/product/${item._id}`}>
+            <img
+              className="h-20 md:h-32 rounded object-cover"
+              src={item.image}
+              alt={item.name}
+            />
+          </Link>
         </div>
         <label className="sr-only">Choose quantity:</label>
 
@@ -41,9 +48,12 @@ const CartItem = ({ item }) => {
         </div>
 
         <div className="w-full min-w-0 flex-1 space-y-4 md:order-2 md:max-w-md">
-          <p className="text-base font-medium text-white hover:text-emerald-400 hover:underline">
+          <Link
+            to={`/product/${item._id}`}
+            className="text-base font-medium text-white hover:text-emerald-400 hover:underline"
+          >
             {item.name}
-          </p>
+          </Link>
           <p className="text-sm text-gray-400">{item.description}</p>
 
           <div className="flex items-center gap-4">

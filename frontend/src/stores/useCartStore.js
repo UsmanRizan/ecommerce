@@ -28,7 +28,7 @@ export const useCartStore = create((set, get) => ({
     }
   },
   removeCoupon: () => {
-    set({ coupon: null, isCouponApplied: false });
+    set({ isCouponApplied: false });
     get().calculateTotals();
     toast.success("Coupon removed");
   },
@@ -44,7 +44,7 @@ export const useCartStore = create((set, get) => ({
     }
   },
   clearCart: async () => {
-    set({ cart: [], coupon: null, total: 0, subtotal: 0 });
+    set({ cart: [], coupon: null, isCouponApplied: false, total: 0, subtotal: 0 });
   },
   addToCart: async (product) => {
     try {
@@ -91,14 +91,15 @@ export const useCartStore = create((set, get) => ({
     get().calculateTotals();
   },
   calculateTotals: () => {
-    const { cart, coupon } = get();
+    const { cart, coupon, isCouponApplied } = get();
     const subtotal = cart.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0,
     );
     let total = subtotal;
 
-    if (coupon) {
+    // an available coupon is only a discount once the user applies it
+    if (coupon && isCouponApplied) {
       const discount = subtotal * (coupon.discountPercentage / 100);
       total = subtotal - discount;
     }

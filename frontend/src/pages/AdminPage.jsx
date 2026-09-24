@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import { BarChart, PlusCircle, ShoppingBasket } from "lucide-react";
+import { BarChart, ClipboardList, PlusCircle, ShoppingBasket } from "lucide-react";
 import { motion } from "framer-motion";
 import AnalyticsTab from "../components/AnalyticsTab";
 import CreateProductForm from "../components/CreateProductForm";
 import ProductsList from "../components/ProductsList";
+import OrdersTab from "../components/OrdersTab";
 import { useProductStore } from "../stores/useProductStore";
 
 const tabs = [
   { id: "create", label: "Create Product", icon: PlusCircle },
   { id: "products", label: "Products", icon: ShoppingBasket },
+  { id: "orders", label: "Orders", icon: ClipboardList },
   { id: "analytics", label: "Analytics", icon: BarChart },
 ];
 
@@ -32,7 +34,7 @@ const AdminPage = () => {
         >
           Admin Dashboard
         </motion.h1>
-        <div className="flex justify-center mb-8">
+        <div className="flex flex-wrap justify-center gap-y-2 mb-8">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -50,6 +52,7 @@ const AdminPage = () => {
         </div>
         {activeTab === "create" && <CreateProductForm />}
         {activeTab === "products" && <ProductsList />}
+        {activeTab === "orders" && <OrdersTab />}
         {activeTab === "analytics" && <AnalyticsTab />}
       </div>
     </div>

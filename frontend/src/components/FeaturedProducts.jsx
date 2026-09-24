@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ShoppingCart, ChevronLeft, ChevronRight } from "lucide-react";
 import { useCartStore } from "../stores/useCartStore";
+import { formatPrice } from "../lib/currency";
 
 const FeaturedProducts = ({ featuredProducts }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -70,7 +71,7 @@ const FeaturedProducts = ({ featuredProducts }) => {
                         </h3>
                       </Link>
                       <p className="text-emerald-300 font-medium mb-4">
-                        ${product.price.toFixed(2)}
+                        {formatPrice(product.price)}
                       </p>
                       <button
                         onClick={() => addToCart(product)}

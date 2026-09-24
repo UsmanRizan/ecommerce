@@ -3,6 +3,11 @@ import Order from "../models/order.model.js";
 import User from "../models/user.model.js";
 import { stripe } from "../lib/stripe.js";
 
+// all store prices are in Sri Lankan rupees (keep in sync with frontend/src/lib/currency.js)
+const CURRENCY = "lkr";
+// orders at or above this amount (in cents) earn a gift coupon: LKR 20,000
+const GIFT_COUPON_THRESHOLD = 20000 * 100;
+
 const SHIPPING_FIELDS = [
   "fullName",
   "email",
@@ -55,12 +60,12 @@ export const createCheckoutSession = async (req, res) => {
     let totalAmount = 0;
 
     const lineItems = products.map((product) => {
-      const amount = Math.round(product.price * 100); // stripe wants u to send in the format of cents
+      const amount = Math.round(product.price * 100); // stripe wants the amount in cents
       totalAmount += amount * product.quantity;
 
       return {
         price_data: {
-          currency: "usd",
+          currency: CURRENCY,
           product_data: {
             name: product.name,
             images: [product.image],
@@ -116,7 +121,7 @@ export const createCheckoutSession = async (req, res) => {
       },
     });
 
-    if (totalAmount >= 20000) {
+    if (totalAmount >= GIFT_COUPON_THRESHOLD) {
       await createNewCoupon(req.user._id);
     }
     res.status(200).json({
@@ -144,57 +149,61 @@ export const checkoutSuccess = async (req, res) => {
       return res.status(400).json({ message: "Payment not completed" });
     }
 
-    // this endpoint can be hit more than once for the same session (page refresh, React StrictMode)
-    const existingOrder = await Order.findOne({ stripeSessionId: sessionId });
-    if (existingOrder) {
-      await User.findByIdAndUpdate(session.metadata.userId, { cartItems: [] });
-      return res.status(200).json({
-        success: true,
-        message: "Order already processed.",
-        orderId: existingOrder._id,
-      });
-    }
-
-    if (session.metadata.couponCode) {
-      await Coupon.findOneAndUpdate(
-        {
-          code: session.metadata.couponCode,
-          userId: session.metadata.userId,
-        },
-        {
-          isActive: false,
-        },
-      );
-    }
-
-    // create a new Order
+    // This endpoint can be hit more than once for the same session (React StrictMode,
+    // page refresh, double requests). Create the order atomically: the upsert only
+    // inserts if no order exists for this session, so concurrent calls can't both create one.
     const products = JSON.parse(session.metadata.products);
-    const newOrder = new Order({
+    const orderData = {
       user: session.metadata.userId,
       products: products.map((product) => ({
         product: product.id,
         quantity: product.quantity,
         price: product.price,
       })),
-      totalAmount: session.amount_total / 100, // convert from cents to dollars,
+      totalAmount: session.amount_total / 100, // convert from cents to rupees
       shippingInfo: Object.fromEntries(
-        SHIPPING_FIELDS.map((field) => [
-          field,
-          session.metadata[`ship_${field}`],
-        ]),
+        SHIPPING_FIELDS.map((field) => [field, session.metadata[`ship_${field}`]]),
       ),
       stripeSessionId: sessionId,
-    });
+      status: "processing",
+      statusHistory: [{ status: "processing", date: new Date() }],
+    };
 
-    await newOrder.save();
+    let order;
+    let isNewOrder = false;
+    try {
+      const result = await Order.findOneAndUpdate(
+        { stripeSessionId: sessionId },
+        { $setOnInsert: orderData },
+        { upsert: true, new: true, includeResultMetadata: true },
+      );
+      order = result.value;
+      isNewOrder = !result.lastErrorObject?.updatedExisting;
+    } catch (error) {
+      // two upserts raced and the unique index rejected the loser: the order already exists
+      if (error.code !== 11000) throw error;
+      order = await Order.findOne({ stripeSessionId: sessionId });
+    }
+
+    // side effects only for the request that actually created the order
+    if (isNewOrder && session.metadata.couponCode) {
+      await Coupon.findOneAndUpdate(
+        {
+          code: session.metadata.couponCode,
+          userId: session.metadata.userId,
+        },
+        { isActive: false },
+      );
+    }
 
     await User.findByIdAndUpdate(session.metadata.userId, { cartItems: [] });
 
     res.status(200).json({
       success: true,
-      message:
-        "Payment successful, order created, and coupon deactivated if used.",
-      orderId: newOrder._id,
+      message: isNewOrder
+        ? "Payment successful, order created, and coupon deactivated if used."
+        : "Order already processed.",
+      orderId: order._id,
     });
   } catch (error) {
     console.error("Error processing successful checkout:", error);

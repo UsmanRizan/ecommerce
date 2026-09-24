@@ -11,6 +11,7 @@ import {
   EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import axios from "../lib/axios";
+import { formatPrice } from "../lib/currency";
 
 const stripePromise = loadStripe(
   "pk_test_51THalKHs4LhW4XJ0D2BBOZ6fSPZe5gVEiG2fDHaa8S0zl7WOza4nyXCf4AeuTbU63ZNtQVCOQC3GVCjok3MwUUyR00yBe0aJZm",
@@ -38,9 +39,9 @@ const OrderSummary = () => {
   };
 
   const savings = subtotal - total;
-  const formattedSubtotal = subtotal.toFixed(2);
-  const formattedTotal = total.toFixed(2);
-  const formattedSavings = savings.toFixed(2);
+  const formattedSubtotal = formatPrice(subtotal);
+  const formattedTotal = formatPrice(total);
+  const formattedSavings = formatPrice(savings);
 
   const handlePayment = async (e) => {
     e.preventDefault();
@@ -98,7 +99,7 @@ const OrderSummary = () => {
             disabled={isSubmitting}
             className="flex w-full items-center justify-center rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-300 disabled:opacity-50"
           >
-            {isSubmitting ? "Loading..." : `Continue to Payment · $${formattedTotal}`}
+            {isSubmitting ? "Loading..." : `Continue to Payment · ${formattedTotal}`}
           </button>
         </form>
       </motion.div>
@@ -144,14 +145,14 @@ const OrderSummary = () => {
               Original price
             </dt>
             <dd className="text-base font-medium text-white">
-              ${formattedSubtotal}
+              {formattedSubtotal}
             </dd>
           </dl>
           {savings > 0 && (
             <dl className="flex items-center justify-between gap-4">
               <dt className="text-base font-normal text-gray-300">Savings</dt>
               <dd className="text-base font-medium text-emerald-400">
-                -${formattedSavings}
+                -{formattedSavings}
               </dd>
             </dl>
           )}
@@ -168,7 +169,7 @@ const OrderSummary = () => {
           <dl className="flex items-center justify-between gap-4 border-t border-gray-600 pt-2">
             <dt className="text-base font-bold text-white">Total</dt>
             <dd className="text-base font-bold text-emerald-400">
-              ${formattedTotal}
+              {formattedTotal}
             </dd>
           </dl>
         </div>

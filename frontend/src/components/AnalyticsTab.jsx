@@ -12,6 +12,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { formatPrice } from "../lib/currency";
 
 const AnalyticsTab = () => {
   const [analyticsData, setAnalyticsData] = useState({
@@ -66,7 +67,7 @@ const AnalyticsTab = () => {
         />
         <AnalyticsCard
           title="Total Revenue"
-          value={`$${analyticsData.totalRevenue.toLocaleString()}`}
+          value={formatPrice(analyticsData.totalRevenue)}
           icon={DollarSign}
           color="from-emerald-500 to-lime-700"
         />
@@ -92,13 +93,13 @@ const AnalyticsTab = () => {
               yAxisId="right"
               orientation="right"
               stroke="#3B82F6"
-              tickFormatter={(v) => `$${v}`}
+              tickFormatter={(v) => `LKR ${v.toLocaleString()}`}
             />
             <Tooltip
               contentStyle={{ backgroundColor: "#1F2937", border: "1px solid #374151", borderRadius: 8 }}
               labelStyle={{ color: "#D1D5DB" }}
               labelFormatter={(d) => new Date(d).toLocaleDateString()}
-              formatter={(value, name) => (name === "Revenue" ? `$${value.toLocaleString()}` : value)}
+              formatter={(value, name) => (name === "Revenue" ? formatPrice(value) : value)}
             />
             <Legend />
             <Line

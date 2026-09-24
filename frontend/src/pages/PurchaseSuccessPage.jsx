@@ -1,21 +1,29 @@
-import { ArrowRight, CheckCircle, HandHeart } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowRight, CheckCircle, Truck } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCartStore } from "../stores/useCartStore";
 import axios from "../lib/axios";
 import Confetti from "react-confetti";
+import { shortOrderId } from "../lib/orderStatus";
 
 const PurchaseSuccessPage = () => {
   const [isProcessing, setIsProcessing] = useState(true);
   const { clearCart } = useCartStore();
   const [error, setError] = useState(null);
+  const [orderId, setOrderId] = useState(null);
+  // StrictMode runs effects twice in development; only confirm the checkout once
+  const hasConfirmed = useRef(false);
 
   useEffect(() => {
+    if (hasConfirmed.current) return;
+    hasConfirmed.current = true;
+
     const handleCheckoutSuccess = async (sessionId) => {
       try {
-        await axios.post("/payments/checkout-success", {
+        const res = await axios.post("/payments/checkout-success", {
           sessionId,
         });
+        setOrderId(res.data.orderId);
         clearCart();
       } catch (error) {
         console.log(error);
@@ -69,7 +77,7 @@ const PurchaseSuccessPage = () => {
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm text-gray-400">Order number</span>
               <span className="text-sm font-semibold text-emerald-400">
-                #12345
+                {orderId ? shortOrderId(orderId) : "—"}
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -81,13 +89,16 @@ const PurchaseSuccessPage = () => {
           </div>
 
           <div className="space-y-4">
-            <button
-              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4
+            {orderId && (
+              <Link
+                to={`/orders/${orderId}`}
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4
              rounded-lg transition duration-300 flex items-center justify-center"
-            >
-              <HandHeart className="mr-2" size={18} />
-              Thanks for trusting us!
-            </button>
+              >
+                <Truck className="mr-2" size={18} />
+                Track your order
+              </Link>
+            )}
             <Link
               to={"/"}
               className="w-full bg-gray-700 hover:bg-gray-600 text-emerald-400 font-bold py-2 px-4 

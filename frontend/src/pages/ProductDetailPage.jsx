@@ -8,6 +8,7 @@ import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
 import ProductCard from "../components/ProductCard";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { formatPrice } from "../lib/currency";
 
 const ProductDetailPage = () => {
   const { id } = useParams();
@@ -120,7 +121,7 @@ const ProductDetailPage = () => {
               {product.name}
             </h1>
             <p className="mb-6 text-3xl font-bold text-emerald-400">
-              ${product.price.toFixed(2)}
+              {formatPrice(product.price)}
             </p>
 
             <p className="mb-8 whitespace-pre-line leading-relaxed text-gray-300">

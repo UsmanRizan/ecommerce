@@ -10,6 +10,8 @@ import LoadingSpinner from "./components/LoadingSpinner";
 import AdminPage from "./pages/AdminPage";
 import CategoryPage from "./pages/CategoryPage";
 import ProductDetailPage from "./pages/ProductDetailPage";
+import OrderHistoryPage from "./pages/OrderHistoryPage";
+import OrderTrackingPage from "./pages/OrderTrackingPage";
 import CartPage from "./pages/CartPage";
 import PurchaseSuccessPage from "./pages/PurchaseSuccessPage";
 import { useCartStore } from "./stores/useCartStore";
@@ -61,6 +63,14 @@ function App() {
           <Route
             path="/cart"
             element={!user ? <Navigate to="/login" /> : <CartPage />}
+          />
+          <Route
+            path="/orders"
+            element={user ? <OrderHistoryPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/orders/:id"
+            element={user ? <OrderTrackingPage /> : <Navigate to="/login" />}
           />
           <Route
             path="/purchase-success"

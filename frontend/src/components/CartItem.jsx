@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Minus, Plus, Trash } from "lucide-react";
 import { useCartStore } from "../stores/useCartStore";
+import { formatPrice } from "../lib/currency";
 
 const CartItem = ({ item }) => {
   const { removeFromCart, updateQuantity } = useCartStore();
@@ -42,7 +43,7 @@ const CartItem = ({ item }) => {
 
           <div className="text-end md:order-4 md:w-32">
             <p className="text-base font-bold text-emerald-400">
-              ${item.price}
+              {formatPrice(item.price)}
             </p>
           </div>
         </div>

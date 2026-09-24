@@ -3,6 +3,7 @@ import { ShoppingCart } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useUserStore } from "../stores/useUserStore";
 import { useCartStore } from "../stores/useCartStore";
+import { formatPrice } from "../lib/currency";
 
 const ProductCard = ({ product }) => {
   const { user } = useUserStore();
@@ -40,7 +41,7 @@ const ProductCard = ({ product }) => {
         <div className="mt-2 mb-5 flex items-center justify-between">
           <p>
             <span className="text-3xl font-bold text-emerald-400">
-              ${product.price}
+              {formatPrice(product.price)}
             </span>
           </p>
         </div>
